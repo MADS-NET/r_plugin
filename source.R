@@ -39,7 +39,8 @@ Source <- R6Class(
     current_data = function() {
       self$i <- self$i + 1
       if (self$i > self$N) self$i <- 1
-      list("arima" = list("i" = self$i, "x" = self$df$x[self$i], "y" = self$df$y[self$i], "z" = self$df$z[self$i]))
+      point = c(self$df$x[self$i], self$df$y[self$i], self$df$z[self$i])
+      list("arima" = list("i" = self$i, "x" = point[1], "y" = point[2], "z" = point[3], "point" = point))
     }
   )
 )
