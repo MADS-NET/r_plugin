@@ -38,6 +38,8 @@ endif()
 
 # DEPENDENCIES #################################################################
 include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL
+  "Do not contact remotes for already populated FetchContent dependencies" FORCE)
 # pugg is for the plugin system
 FetchContent_Declare(pugg 
   GIT_REPOSITORY https://github.com/pbosetti/pugg.git
@@ -53,13 +55,20 @@ FetchContent_Declare(json
   GIT_SHALLOW    TRUE
 )
 
+set(EMBEDR_BUILD_TESTS ON CACHE INTERNAL "")
 FetchContent_Declare(EmbedR
   GIT_REPOSITORY https://github.com/pbosetti/EmbedR.git
-  GIT_TAG HEAD
+  GIT_TAG        e1ad223
   GIT_SHALLOW TRUE
 )
 
 FetchContent_MakeAvailable(pugg json EmbedR)
+
+# EmbedR exports EmbedRTargets and links nlohmann_json publicly.
+# Ensure nlohmann_json is exported as well to avoid configure-time export-set errors.
+if(TARGET nlohmann_json)
+  install(TARGETS nlohmann_json EXPORT EmbedRTargets)
+endif()
 
 FetchContent_Populate(plugin 
   GIT_REPOSITORY https://github.com/pbosetti/mads_plugin.git
