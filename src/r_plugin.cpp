@@ -53,7 +53,7 @@ public:
 
     EmbedR::RInterpreter::RValue result;
     try {
-      result = _r_interpreter->eval("load_data()");
+      result = _r_interpreter->eval("get_output()");
     } catch (const std::exception& e) {
       _error = e.what();
       return return_type::retry;
@@ -61,7 +61,7 @@ public:
     if (std::holds_alternative<nlohmann::json>(result)) {
       out = std::get<nlohmann::json>(result);
     } else {
-      _error = "Unexpected return type from load_data()";
+      _error = "Unexpected return type from get_output()";
       return return_type::retry;
     }
     return return_type::success;
@@ -83,18 +83,24 @@ public:
     try {
       _r_interpreter = make_unique<RInterpreter>(_r_options);
     } catch (const std::exception& e) {
-      _error = e.what();
+      cerr << "Error initializing R interpreter: " << e.what() << endl;
+      exit(EXIT_FAILURE);
     }
 
     if (_params.contains("init_script")) {
+      try {
       _r_interpreter->source_script(_params["init_script"].get<std::string>());
+      } catch (const std::exception& e) {
+        cerr << "Error sourcing init_script: " << e.what() << endl;
+        exit(EXIT_FAILURE);
+      }
     } else {
       throw std::runtime_error("Missing required parameter: init_script");
     }
 
-    const auto result = _r_interpreter->eval("exists('load_data') & is.function(load_data)");
+    const auto result = _r_interpreter->eval("exists('get_output') & is.function(get_output)");
     if (!std::holds_alternative<bool>(result) || !std::get<bool>(result)) {
-      throw std::runtime_error("The init_script must define a function named load_data");
+      throw std::runtime_error("The init_script must define a function named get_output with the appropriate signature for the agent type.");
     }
   }
 
