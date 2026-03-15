@@ -83,16 +83,14 @@ public:
     try {
       _r_interpreter = make_unique<RInterpreter>(_r_options);
     } catch (const std::exception& e) {
-      cerr << "Error initializing R interpreter: " << e.what() << endl;
-      exit(EXIT_FAILURE);
+      throw std::runtime_error("Error initializing R interpreter: " + std::string(e.what()));
     }
 
     if (_params.contains("init_script")) {
       try {
       _r_interpreter->source_script(_params["init_script"].get<std::string>());
       } catch (const std::exception& e) {
-        cerr << "Error sourcing init_script: " << e.what() << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Error sourcing init_script: " + std::string(e.what()));
       }
     } else {
       throw std::runtime_error("Missing required parameter: init_script");
