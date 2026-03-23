@@ -48,11 +48,12 @@ r_output_mode = "stdout" # or "buffer"
 
 All settings are optional; if omitted, the default values are used.
 
+# R script details
 
+The R script (loaded by the `init_script` config path), must define a valid R function, whose name and signature depends on the type of plugin:
 
-
-## Executable demo
-
-<Explain what happens if the test executable is run>
+* a **source**: there must be a `get_output()` function that takes no arguments and returns a R list (which is automatically converted to JSON object)
+* a **filter**: there must be a `process(list)` function that takes a list as a single argument; that list represents the JSON received by the filter agent, and the function must return another list (automatically converted to JSON)
+* a **sink**: there must be a `deal_with_data(list)` function that takes a list as a single argument; that list represents the JSON received by the sink agent
 
 ---

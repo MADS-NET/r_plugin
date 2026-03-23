@@ -19,6 +19,7 @@
 #include <pugg/Kernel.h>
 #include <EmbedR.hpp>
 #include <variant>
+#include "r_plugin_common.hpp"
 
 // other includes as needed here
 
@@ -61,54 +62,21 @@ public:
 
   void set_params(const json &params) override { 
     Sink::set_params(params);
-    _params["use_renv"] = true;
-    _params["r_output_mode"] = "stdout";
-    _params.merge_patch(params);
-    
-    if (_params.value("use_renv", false)) {
-      _r_options.auto_load_current_dir_renv = true;
-    } else {
-      _r_options.auto_load_current_dir_renv = false;
-    }
-
-    if (_params["r_output_mode"] == "stdout") {
-      _r_options.output_mode = RInterpreter::OutputMode::Stdout;
-    } else if (_params["r_output_mode"] == "buffer") {
-      _r_options.output_mode = RInterpreter::OutputMode::Buffer;
-    } else {
-      throw std::runtime_error("Invalid value for r_output_mode. Expected 'stdout' or 'buffer'.");
-    }
-
-    try {
-      _r_interpreter = make_unique<RInterpreter>(_r_options);
-    } catch (const std::exception& e) {
-      throw std::runtime_error("Error initializing R interpreter: " + std::string(e.what()));
-    }
-
-    if (_params.contains("init_script")) {
-      try {
-      _r_interpreter->source_script(_params["init_script"].get<std::string>());
-      } catch (const std::exception& e) {
-        throw std::runtime_error("Error sourcing init_script: " + std::string(e.what()));
-      }
-    } else {
-      throw std::runtime_error("Missing required parameter: init_script");
-    }
-
-    const auto result = _r_interpreter->eval("exists('deal_with_data') & is.function(deal_with_data)");
-    if (!std::holds_alternative<bool>(result) || !std::get<bool>(result)) {
-      throw std::runtime_error("The init_script must define a function named deal_with_data with the appropriate signature for the agent type.");
-    }
+    RPluginCommon::initialize_r_plugin(
+      params,
+      _params,
+      _r_options,
+      _r_interpreter,
+      "deal_with_data",
+      "agent");
   }
 
   // Implement this method if you want to provide additional information
   map<string, string> info() override { 
-    // return a map of strings with additional information about the plugin
-    // it is used to print the information about the plugin when it is loaded
-    // by the agent
-    
-    return {};
-    
+    return {
+      {"Using .renv", _r_options.auto_load_current_dir_renv ? "Yes" : "No"},
+      {"Output mode", _r_options.output_mode == RInterpreter::OutputMode::Stdout ? "Stdout" : "Buffer"}
+    };
   };
 
 private:
