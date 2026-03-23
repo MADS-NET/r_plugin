@@ -1,3 +1,5 @@
+[![Build Check](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml/badge.svg?branch=main)](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml)
+
 # r_plugin plugin for MADS
 
 This is a Source plugin for [MADS](https://github.com/MADS-NET/MADS). The plugin provides a way to embed an R interpreter in the process, which can act as a source, filter, or sink. It works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).

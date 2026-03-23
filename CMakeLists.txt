@@ -117,8 +117,6 @@ endmacro()
 # BUILD SETTINGS ###############################################################
 if (APPLE)
   set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
-  include_directories(/opt/homebrew/include)
-  link_directories(/opt/homebrew/lib)
 else()
   set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib;/usr/local/lib")
 endif()

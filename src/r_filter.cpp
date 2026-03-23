@@ -16,6 +16,8 @@
 #include <filter.hpp>
 #include <nlohmann/json.hpp>
 #include <pugg/Kernel.h>
+#include <EmbedR.hpp>
+#include <variant>
 
 // other includes as needed here
 
@@ -27,6 +29,7 @@
 // Load the namespaces
 using namespace std;
 using json = nlohmann::json;
+using EmbedR::RInterpreter;
 
 
 // Plugin class. This shall be the only part that needs to be modified,
@@ -61,27 +64,57 @@ public:
   return_type process(json &out, vector<unsigned char> *blob = nullptr) override {
     out.clear();
 
-    // load the data as necessary and set the fields of the json out variable
-
-    // This sets the agent_id field in the output json object, only when it is
-    // not empty
+    auto function = _r_interpreter->function("process");
+    auto result = function(out);
+    if (!std::holds_alternative<json>(result)) {
+      _error = "Unexpected return type from process()";
+      return return_type::error;
+    }
+    out = std::get<json>(result);
     if (!_agent_id.empty()) out["agent_id"] = _agent_id;
     return return_type::success;
   }
   
   void set_params(const json &params) override {
-    // Call the parent class method to set the common parameters 
-    // (e.g. agent_id, etc.)
     Filter::set_params(params);
-
-    // provide sensible defaults for the parameters by setting e.g.
-    _params["some_field"] = "default_value";
-    // more here...
-
-    // then merge the defaults with the actually provided parameters
-    // params needs to be cast to json
+    _params["use_renv"] = true;
+    _params["r_output_mode"] = "stdout";
     _params.merge_patch(params);
-      
+    
+    if (_params.value("use_renv", false)) {
+      _r_options.auto_load_current_dir_renv = true;
+    } else {
+      _r_options.auto_load_current_dir_renv = false;
+    }
+
+    if (_params["r_output_mode"] == "stdout") {
+      _r_options.output_mode = RInterpreter::OutputMode::Stdout;
+    } else if (_params["r_output_mode"] == "buffer") {
+      _r_options.output_mode = RInterpreter::OutputMode::Buffer;
+    } else {
+      throw std::runtime_error("Invalid value for r_output_mode. Expected 'stdout' or 'buffer'.");
+    }
+
+    try {
+      _r_interpreter = make_unique<RInterpreter>(_r_options);
+    } catch (const std::exception& e) {
+      throw std::runtime_error("Error initializing R interpreter: " + std::string(e.what()));
+    }
+
+    if (_params.contains("init_script")) {
+      try {
+      _r_interpreter->source_script(_params["init_script"].get<std::string>());
+      } catch (const std::exception& e) {
+        throw std::runtime_error("Error sourcing init_script: " + std::string(e.what()));
+      }
+    } else {
+      throw std::runtime_error("Missing required parameter: init_script");
+    }
+
+    const auto result = _r_interpreter->eval("exists('process') & is.function(process)");
+    if (!std::holds_alternative<bool>(result) || !std::get<bool>(result)) {
+      throw std::runtime_error("The init_script must define a function named process with the appropriate signature for the agent type.");
+    }  
   }
 
   // Implement this method if you want to provide additional information
@@ -95,7 +128,8 @@ public:
   };
 
 private:
-  // Define the fields that are used to store internal resources
+  RInterpreter::Options _r_options;
+  unique_ptr<RInterpreter> _r_interpreter;
   
 };
 

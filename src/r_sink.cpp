@@ -51,7 +51,11 @@ public:
   // return_type::critical: execution stops
   return_type load_data(json const &input, string topic = "", vector<unsigned char> const *blob = nullptr) override {
     auto deal_with_data_func = _r_interpreter->function("deal_with_data");
-    deal_with_data_func(input);
+    auto result = deal_with_data_func(input);
+    if (!std::holds_alternative<bool>(result) || !std::get<bool>(result)) {
+      _error = "deal_with_data returned false or non-boolean value";
+      return return_type::error;
+    }
     return return_type::success;
   }
 
