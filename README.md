@@ -1,8 +1,8 @@
 [![Build Check](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml/badge.svg?branch=main)](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml)
 
-# r_plugin plugin for MADS
+# r_plugin collection for MADS
 
-This is a Source plugin for [MADS](https://github.com/MADS-NET/MADS). The plugin provides a way to embed an R interpreter in the process, which can act as a source, filter, or sink. It works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).
+This project provides a Source, a Filret and a Sink plugin for [MADS](https://github.com/MADS-NET/MADS). The plugins provide a way to embed an R interpreter in the MADS network. They works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).
 
 *Required MADS version: 2.0.0.*
 
