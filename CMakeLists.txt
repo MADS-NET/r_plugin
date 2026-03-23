@@ -55,10 +55,18 @@ FetchContent_Declare(json
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
+# EmbedR's configure step expects a concrete include path for nlohmann_json.
+# When json is provided via FetchContent, the target often exposes generator
+# expressions only, so pass the include directory explicitly up front.
+set(EMBEDR_NLOHMANN_JSON_INCLUDE_DIR
+  "${CMAKE_CURRENT_BINARY_DIR}/_deps/json-src/include"
+  CACHE PATH "nlohmann_json include directory for EmbedR" FORCE
+)
+
 set(EMBEDR_BUILD_TESTS ON CACHE INTERNAL "")
 FetchContent_Declare(EmbedR
   GIT_REPOSITORY https://github.com/pbosetti/EmbedR.git
-  GIT_TAG        HEAD
+  GIT_TAG        v0.1.0
   GIT_SHALLOW TRUE
 )
 
