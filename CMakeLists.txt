@@ -30,6 +30,7 @@ endif()
 # PROJECT SETTINGS #############################################################
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 
 if(UNIX AND NOT APPLE)
@@ -57,7 +58,7 @@ FetchContent_Declare(json
 set(EMBEDR_BUILD_TESTS ON CACHE INTERNAL "")
 FetchContent_Declare(EmbedR
   GIT_REPOSITORY https://github.com/pbosetti/EmbedR.git
-  GIT_TAG        e1ad223
+  GIT_TAG        HEAD
   GIT_SHALLOW TRUE
 )
 
@@ -124,7 +125,9 @@ endif()
 include_directories(${json_SOURCE_DIR}/include)
 
 # These plugins are always build and use for testing
-add_plugin(r_plugin LIBS EmbedR::EmbedR)
+add_plugin(r_source LIBS EmbedR::EmbedR)
+add_plugin(r_sink LIBS EmbedR::EmbedR)
+add_plugin(r_filter LIBS EmbedR::EmbedR)
 
 
 # INSTALL ######################################################################

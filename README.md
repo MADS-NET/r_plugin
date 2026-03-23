@@ -1,8 +1,6 @@
 # r_plugin plugin for MADS
 
-This is a Source plugin for [MADS](https://github.com/MADS-NET/MADS). 
-
-<provide here some introductory info>
+This is a Source plugin for [MADS](https://github.com/MADS-NET/MADS). The plugin provides a way to embed an R interpreter in the process, which can act as a source, filter, or sink. It works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).
 
 *Required MADS version: 2.0.0.*
 
@@ -41,7 +39,9 @@ The plugin supports the following settings in the INI file:
 
 ```ini
 [r_plugin]
-# Describe the settings available to the plugin
+use_renv = false # use renv for package management
+init_script = "/path/to/scrip.R" # Mandatory path to the R script
+r_output_mode = "stdout" # or "buffer"
 ```
 
 All settings are optional; if omitted, the default values are used.
