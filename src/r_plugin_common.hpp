@@ -15,7 +15,7 @@ using json = nlohmann::json;
 using EmbedR::RInterpreter;
 
 inline void apply_common_r_params(json const &params, json &plugin_params) {
-  plugin_params["use_renv"] = true;
+  plugin_params["use_renv"] = false;
   plugin_params["r_output_mode"] = "stdout";
   plugin_params.merge_patch(params);
 }
