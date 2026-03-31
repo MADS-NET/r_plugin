@@ -77,6 +77,11 @@ public:
       _r_interpreter,
       "get_output",
       "agent");
+    auto result = _r_interpreter->eval("exists('set_params') && is.function(set_params)");
+    if (std::holds_alternative<bool>(result) && std::get<bool>(result)) {
+      auto set_params_func = _r_interpreter->function("set_params");
+      set_params_func(params);
+    }
   }
 
   // Implement this method if you want to provide additional information

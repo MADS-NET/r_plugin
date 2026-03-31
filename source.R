@@ -47,5 +47,9 @@ Source <- R6Class(
 
 arima <- Source$new(3000)
 
+set_params <- function(params) {
+  print(params)
+}
+
 # Entry point
 get_output <- function() arima$current_data()

@@ -6,6 +6,8 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <vector>
 
 namespace RPluginCommon {
 
@@ -79,17 +81,45 @@ inline void validate_required_function(
   }
 }
 
+template <typename RequiredFunction>
+inline void validate_required_functions(
+  RInterpreter &r_interpreter,
+  RequiredFunction const &required_function,
+  std::string const &agent_type) {
+  using DecayedType = std::decay_t<RequiredFunction>;
+
+  if constexpr (
+    std::is_constructible_v<std::string, RequiredFunction const &>) {
+    validate_required_function(
+      r_interpreter,
+      std::string(required_function),
+      agent_type);
+  } else if constexpr (
+    std::is_same_v<DecayedType, std::vector<std::string>>) {
+    for (auto const &function_name : required_function) {
+      validate_required_function(r_interpreter, function_name, agent_type);
+    }
+  } else {
+    static_assert(
+      std::is_constructible_v<std::string, RequiredFunction const &> ||
+        std::is_same_v<DecayedType, std::vector<std::string>>,
+      "required_function must be a string-like value or "
+      "std::vector<std::string>");
+  }
+}
+
+template <typename RequiredFunction>
 inline void initialize_r_plugin(
   json const &params,
   json &plugin_params,
   RInterpreter::Options &r_options,
   std::unique_ptr<RInterpreter> &r_interpreter,
-  std::string const &required_function,
+  RequiredFunction const &required_function,
   std::string const &agent_type) {
   apply_common_r_params(params, plugin_params);
   initialize_r_interpreter(plugin_params, r_options, r_interpreter);
   source_init_script(plugin_params, *r_interpreter);
-  validate_required_function(*r_interpreter, required_function, agent_type);
+  validate_required_functions(*r_interpreter, required_function, agent_type);
 }
 
 }  // namespace RPluginCommon
