@@ -50,7 +50,12 @@ public:
   // return_type::error: _error is traced, skip process
   // return_type::critical: execution stops
   return_type load_data(json const &input, string topic = "", vector<unsigned char> const *blob = nullptr) override {
-    // Do something with the input data
+    auto function = _r_interpreter->function("load_data");
+    auto result = function(input);
+    if (!std::holds_alternative<json>(result)) {
+      _error = "Unexpected return type from load_data()";
+      return return_type::error;
+    }
     return return_type::success;
   }
 
