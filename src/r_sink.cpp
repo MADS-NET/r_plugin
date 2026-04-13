@@ -51,21 +51,27 @@ public:
   // return_type::error: _error is traced, skip process
   // return_type::critical: execution stops
   return_type load_data(json const &input, string topic = "", vector<unsigned char> const *blob = nullptr) override {
-    auto deal_with_data_func = _r_interpreter->function("deal_with_data");
-    auto result = deal_with_data_func(input);
+    EmbedR::RInterpreter::RValue result;
+    auto load_data_func = _r_interpreter->function("load_data");
+    try {
+      result = load_data_func(input);
+    } catch (const std::exception& e) {
+      _error = e.what();
+      return return_type::error;
+    }
     if (std::holds_alternative<string>(result)) {
       string return_type_str = std::get<string>(result);
       auto it = RPluginCommon::return_type_map.find(return_type_str);
       if (it != RPluginCommon::return_type_map.end()) {
         return it->second;
       } else {
-        _error = "Invalid return type string from deal_with_data(): " + return_type_str;
+        _error = "Invalid return type string from load_data(): " + return_type_str;
         return return_type::error;
       }
     } else if (std::holds_alternative<bool>(result)) {
       return std::get<bool>(result) ? return_type::success : return_type::error;
     } else {
-      _error = "deal_with_data returned invalid type (expected string or bool)";
+      _error = "load_data returned invalid type (expected string or bool)";
       return return_type::error;
     }
     return return_type::success;
@@ -78,7 +84,7 @@ public:
       _params,
       _r_options,
       _r_interpreter,
-      "deal_with_data",
+      "load_data",
       "agent");
     auto result = _r_interpreter->eval("exists('set_params') && is.function(set_params)");
     if (std::holds_alternative<bool>(result) && std::get<bool>(result)) {

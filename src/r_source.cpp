@@ -53,8 +53,9 @@ public:
     if (!_agent_id.empty()) out["agent_id"] = _agent_id;
 
     EmbedR::RInterpreter::RValue result;
+    auto function = _r_interpreter->function("get_output");
     try {
-      result = _r_interpreter->eval("get_output()");
+      result = function();
     } catch (const std::exception& e) {
       _error = e.what();
       return return_type::error;

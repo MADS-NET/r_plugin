@@ -66,7 +66,7 @@ set(EMBEDR_NLOHMANN_JSON_INCLUDE_DIR
 set(EMBEDR_BUILD_TESTS ON CACHE INTERNAL "")
 FetchContent_Declare(EmbedR
   GIT_REPOSITORY https://github.com/pbosetti/EmbedR.git
-  GIT_TAG        v0.1.0
+  GIT_TAG        v0.1.1
   GIT_SHALLOW TRUE
 )
 

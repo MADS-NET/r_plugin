@@ -56,6 +56,15 @@ The R script (loaded by the `init_script` config path), must define a valid R fu
 * a **source**: there must be a `get_output()` function that takes no arguments and must return a list (automatically converted to JSON)
 * a **sink**: there must be a `load_data(list)` function that takes a list as a single argument; that list represents the JSON received by the sink agent
 
-Regardless its type, the script may optionally define a `set_params(list)` function that receives the list corresponding to the JSON ocject passed during plugin startup.
+Regardless its type, the script may **optionally** define a `set_params(list)` function that receives the list corresponding to the JSON ocject passed during plugin startup.
+
+**Notes on functions**:
+
+- `load_data(list)`: in sinks and filters is the function that loads data from network into the R script; it receives a list (generated from the incoming JSON) and it is expected to store it internally in the script. The returned value might be `TRUE` (success), `FALSE` (falure), or a string like `success`, `failure`, `retry`, `error`, `critical`
+- `get_output()`: in sources, must return a valid list and takes no arguments. The returned list may contain the field `return_type`, which may be `TRUE` (success), `FALSE` (falure), or a string like `success`, `failure`, `retry`, `error`, `critical`.
+- `process()`: in filters, elaborates the data stored by `load_data()` and returns a valid list as result, taking no arguments. The returned list may contain the field `return_type`, which may be `TRUE` (success), `FALSE` (falure), or a string like `success`, `failure`, `retry`, `error`, `critical`.
+
+For the meanings and effects of the return types, see the comments in the source code files `src/r_[source|filter|sink].cpp`.
+
 
 ---

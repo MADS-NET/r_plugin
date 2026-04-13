@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -73,11 +74,25 @@ inline void source_init_script(json const &plugin_params,
     throw std::runtime_error("Missing required parameter: init_script");
   }
 
+  auto const script_path = plugin_params["init_script"].get<std::string>();
+  if (script_path.empty()) {
+    throw std::runtime_error("init_script must not be empty");
+  }
+
+  std::ifstream script_stream(script_path, std::ios::binary);
+  if (!script_stream.is_open()) {
+    throw std::runtime_error("Unable to open init_script: " + script_path);
+  }
+
+  script_stream.seekg(0, std::ios::end);
+  if (script_stream.tellg() == 0) {
+    throw std::runtime_error("init_script is empty: " + script_path);
+  }
+
   try {
-    r_interpreter.source_script(
-        plugin_params["init_script"].get<std::string>());
+    r_interpreter.source_script(script_path);
   } catch (std::exception const &e) {
-    throw std::runtime_error("Error sourcing init_script: " +
+    throw std::runtime_error("Error sourcing init_script '" + script_path + "': " +
                              std::string(e.what()));
   }
 }
@@ -87,7 +102,13 @@ inline void validate_required_function(RInterpreter &r_interpreter,
                                        std::string const &agent_type) {
   auto const expression =
       "exists('" + function_name + "') & is.function(" + function_name + ")";
-  auto const result = r_interpreter.eval(expression);
+  RInterpreter::RValue result;
+  try {
+    result = r_interpreter.eval(expression);
+  } catch (std::exception const &e) {
+    throw std::runtime_error("Error validating required function '" +
+                             function_name + "': " + std::string(e.what()));
+  }
   if (!std::holds_alternative<bool>(result) || !std::get<bool>(result)) {
     throw std::runtime_error(
         "The init_script must define a function named " + function_name +

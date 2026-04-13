@@ -6,6 +6,6 @@ set_params <- function(params) {
   print(parameters)
 }
 
-deal_with_data <- function(data) {
+load_data <- function(data) {
   print(paste("Received data:", data))
 }

@@ -51,20 +51,26 @@ public:
   // return_type::critical: execution stops
   return_type load_data(json const &input, string topic = "", vector<unsigned char> const *blob = nullptr) override {
     auto function = _r_interpreter->function("load_data");
-    auto result = function(input);
+    EmbedR::RInterpreter::RValue result;
+    try {
+      result = function(input);
+    } catch (const std::exception& e) {
+      _error = e.what();
+      return return_type::error;
+    }
     if (std::holds_alternative<string>(result)) {
       string return_type_str = std::get<string>(result);
       auto it = RPluginCommon::return_type_map.find(return_type_str);
       if (it != RPluginCommon::return_type_map.end()) {
         return it->second;
       } else {
-        _error = "Invalid return type string from deal_with_data(): " + return_type_str;
+        _error = "Invalid return type string from load_data(): " + return_type_str;
         return return_type::error;
       }
     } else if (std::holds_alternative<bool>(result)) {
       return std::get<bool>(result) ? return_type::success : return_type::error;
     } else {
-      _error = "deal_with_data returned invalid type (expected string or bool)";
+      _error = "load_data returned invalid type (expected string or bool)";
       return return_type::error;
     }
     return return_type::success;
@@ -81,8 +87,14 @@ public:
   return_type process(json &out, vector<unsigned char> *blob = nullptr) override {
     out.clear();
 
+    EmbedR::RInterpreter::RValue result;
     auto function = _r_interpreter->function("process");
-    auto result = function(out);
+    try {
+      result = function();
+    } catch (const std::exception& e) {
+      _error = e.what();
+      return return_type::error;
+    }
     if (!std::holds_alternative<json>(result)) {
       _error = "Unexpected return type from process()";
       return return_type::error;
@@ -109,9 +121,16 @@ public:
       _params,
       _r_options,
       _r_interpreter,
-      std::vector<std::string>{{"load_data", "process"}},
+      std::vector<std::string>{"load_data", "process"},
       "agent");
-    auto result = _r_interpreter->eval("exists('set_params') && is.function(set_params)");
+    RInterpreter::RValue result;
+    try {
+      result = _r_interpreter->eval(
+          "exists('set_params') && is.function(set_params)");
+    } catch (std::exception const &e) {
+      throw std::runtime_error("Error checking optional R function 'set_params': " +
+                               std::string(e.what()));
+    }
     if (std::holds_alternative<bool>(result) && std::get<bool>(result)) {
       auto set_params_func = _r_interpreter->function("set_params");
       set_params_func(params);
@@ -156,29 +175,33 @@ INSTALL_FILTER_DRIVER(RFilter, json, json);
 
 int main(int argc, char const *argv[])
 {
-  RFilter plugin;
-  json params;
-  json input, output;
+  try {
+    RFilter plugin;
+    json params;
+    json input, output;
 
-  // Set example values to params
-  params["test"] = "value";
-  params["use_renv"] = false;
-  params["init_script"] = "filter.R";
+    // Set example values to params
+    params["test"] = "value";
+    params["use_renv"] = false;
+    params["init_script"] = "filter.R";
 
-  // Set the parameters
-  plugin.set_params(params);
+    // Set the parameters
+    plugin.set_params(params);
 
-  // Set input data
-  input["value"] = 42;
+    // Set input data
+    input["value"] = 42;
 
-  // Set input data
-  plugin.load_data(input);
-  cout << "Input: " << input.dump(2) << endl;
+    // Set input data
+    plugin.load_data(input);
+    cout << "Input: " << input.dump(2) << endl;
 
-  // Process data
-  plugin.process(output);
-  cout << "Output: " << output.dump(2) << endl;
-
+    // Process data
+    plugin.process(output);
+    cout << "Output: " << output.dump(2) << endl;
+  } catch (std::exception const &e) {
+    cerr << "r_filter.plugin failed: " << e.what() << endl;
+    return 1;
+  }
 
   return 0;
 }
