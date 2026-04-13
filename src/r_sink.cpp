@@ -53,8 +53,19 @@ public:
   return_type load_data(json const &input, string topic = "", vector<unsigned char> const *blob = nullptr) override {
     auto deal_with_data_func = _r_interpreter->function("deal_with_data");
     auto result = deal_with_data_func(input);
-    if (!std::holds_alternative<bool>(result) || !std::get<bool>(result)) {
-      _error = "deal_with_data returned false or non-boolean value";
+    if (std::holds_alternative<string>(result)) {
+      string return_type_str = std::get<string>(result);
+      auto it = RPluginCommon::return_type_map.find(return_type_str);
+      if (it != RPluginCommon::return_type_map.end()) {
+        return it->second;
+      } else {
+        _error = "Invalid return type string from deal_with_data(): " + return_type_str;
+        return return_type::error;
+      }
+    } else if (std::holds_alternative<bool>(result)) {
+      return std::get<bool>(result) ? return_type::success : return_type::error;
+    } else {
+      _error = "deal_with_data returned invalid type (expected string or bool)";
       return return_type::error;
     }
     return return_type::success;
@@ -67,7 +78,7 @@ public:
       _params,
       _r_options,
       _r_interpreter,
-      "load_data",
+      "deal_with_data",
       "agent");
     auto result = _r_interpreter->eval("exists('set_params') && is.function(set_params)");
     if (std::holds_alternative<bool>(result) && std::get<bool>(result)) {
@@ -116,12 +127,15 @@ For testing purposes, when directly executing the plugin
 int main(int argc, char const *argv[]) {
   RSink plugin;
   json input, params;
-  
+  params["use_renv"] = false;
+  params["init_script"] = "sink.R";
   // Set example values to params
   params["test"] = "value";
 
   // Set the parameters
   plugin.set_params(params);
+
+  input = {{"key1", "value1"}, {"key2", 2}, {"key3", true}};
 
   // Process data
   plugin.load_data(input);

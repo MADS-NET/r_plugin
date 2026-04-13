@@ -52,8 +52,19 @@ public:
   return_type load_data(json const &input, string topic = "", vector<unsigned char> const *blob = nullptr) override {
     auto function = _r_interpreter->function("load_data");
     auto result = function(input);
-    if (!std::holds_alternative<json>(result)) {
-      _error = "Unexpected return type from load_data()";
+    if (std::holds_alternative<string>(result)) {
+      string return_type_str = std::get<string>(result);
+      auto it = RPluginCommon::return_type_map.find(return_type_str);
+      if (it != RPluginCommon::return_type_map.end()) {
+        return it->second;
+      } else {
+        _error = "Invalid return type string from deal_with_data(): " + return_type_str;
+        return return_type::error;
+      }
+    } else if (std::holds_alternative<bool>(result)) {
+      return std::get<bool>(result) ? return_type::success : return_type::error;
+    } else {
+      _error = "deal_with_data returned invalid type (expected string or bool)";
       return return_type::error;
     }
     return return_type::success;
@@ -76,8 +87,18 @@ public:
       _error = "Unexpected return type from process()";
       return return_type::error;
     }
-    out = std::get<json>(result);
     if (!_agent_id.empty()) out["agent_id"] = _agent_id;
+    out = std::get<json>(result);
+    if (out.contains("return_type") && out["return_type"].is_string()) {
+      auto rt_str = out["return_type"].get<std::string>();
+      auto it = RPluginCommon::return_type_map.find(rt_str);
+      out.erase("return_type");
+      if (it != RPluginCommon::return_type_map.end()) {
+        return it->second;
+      } else { 
+        return return_type::success;
+      }
+    }
     return return_type::success;
   }
   
@@ -141,16 +162,14 @@ int main(int argc, char const *argv[])
 
   // Set example values to params
   params["test"] = "value";
+  params["use_renv"] = false;
+  params["init_script"] = "filter.R";
 
   // Set the parameters
   plugin.set_params(params);
 
   // Set input data
-  input["data"] = {
-    {"AX", 1},
-    {"AY", 2},
-    {"AZ", 3}
-  };
+  input["value"] = 42;
 
   // Set input data
   plugin.load_data(input);

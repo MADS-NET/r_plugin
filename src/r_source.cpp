@@ -57,13 +57,23 @@ public:
       result = _r_interpreter->eval("get_output()");
     } catch (const std::exception& e) {
       _error = e.what();
-      return return_type::retry;
+      return return_type::error;
     }
     if (std::holds_alternative<nlohmann::json>(result)) {
       out = std::get<nlohmann::json>(result);
     } else {
       _error = "Unexpected return type from get_output()";
-      return return_type::retry;
+      return return_type::error;
+    }
+    if (out.contains("return_type") && out["return_type"].is_string()) {
+      auto rt_str = out["return_type"].get<std::string>();
+      auto it = RPluginCommon::return_type_map.find(rt_str);
+      out.erase("return_type");
+      if (it != RPluginCommon::return_type_map.end()) {
+        return it->second;
+      } else { 
+        return return_type::success;
+      }
     }
     return return_type::success;
   }
@@ -133,13 +143,15 @@ int main(int argc, char const *argv[]) {
 
   // Process data
   plugin.get_output(output);
-  cout << "Output: " << output << endl;
+  cout << RPluginCommon::return_type_reverse_map.at(plugin.get_output(output)) << ": Output: " << output << endl;
   plugin.get_output(output);
-  cout << "Output: " << output << endl;
+  cout << RPluginCommon::return_type_reverse_map.at(plugin.get_output(output)) << ": Output: " << output << endl;
   plugin.get_output(output);
-  cout << "Output: " << output << endl;
+  cout << RPluginCommon::return_type_reverse_map.at(plugin.get_output(output)) << ": Output: " << output << endl;
   plugin.get_output(output);
-  cout << "Output: " << output << endl;
+  cout << RPluginCommon::return_type_reverse_map.at(plugin.get_output(output)) << ": Output: " << output << endl;
+  plugin.get_output(output);
+  cout << RPluginCommon::return_type_reverse_map.at(plugin.get_output(output)) << ": Output: " << output << endl;
 
   return 0;
 }
