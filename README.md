@@ -1,4 +1,5 @@
-[![Build Check](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml/badge.svg?branch=main)](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml)
+[![Build Check](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml/badge.svg?branch=main)](https://github.com/MADS-NET/r_plugin/actions/workflows/build-check.yml) ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMADS-NET%2F.github%2Fmain%2Fprofile%2Fpackages.json&query=%24.packages.%5B'r.plugin'%5D.type&label=mads%20package)
+
 
 # r_plugin collection for MADS
 
@@ -15,8 +16,15 @@ Currently, the supported platforms are:
 * **MacOS**
 * **Windows**
 
+## Package install
 
-## Installation
+with MADS v2.1.1 or later, install with:
+
+```bash
+mads package --install r.plugin
+```
+
+## Install from binaries
 
 Linux and MacOS:
 

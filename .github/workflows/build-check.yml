@@ -3,7 +3,7 @@ name: Build Check
 on:
   push:
     branches:
-      - main
+      - devel
   pull_request:
 
 jobs:
