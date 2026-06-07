@@ -72,6 +72,12 @@ FetchContent_Declare(EmbedR
 
 FetchContent_MakeAvailable(pugg json EmbedR)
 
+# R 4.6 hides these declarations unless legacy non-API functions are enabled.
+# EmbedR v0.1.1 still calls Rf_findVarInFrame directly.
+if(TARGET EmbedR)
+  target_compile_definitions(EmbedR PRIVATE ENABLE_LEGACY_NONAPI_FUNS)
+endif()
+
 # EmbedR exports EmbedRTargets and links nlohmann_json publicly.
 # Ensure nlohmann_json is exported as well to avoid configure-time export-set errors.
 if(TARGET nlohmann_json)
