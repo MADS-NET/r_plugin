@@ -41,18 +41,27 @@ endif()
 include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL
   "Do not contact remotes for already populated FetchContent dependencies" FORCE)
+
+set(FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+  set(FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS EXCLUDE_FROM_ALL)
+endif()
+
 # pugg is for the plugin system
 FetchContent_Declare(pugg 
   GIT_REPOSITORY https://github.com/pbosetti/pugg.git
   GIT_TAG        1.0.2
   GIT_SHALLOW    TRUE
+  ${FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS}
 )
 
 set(BUILD_TESTING OFF CACHE INTERNAL "")
 set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_Install OFF CACHE INTERNAL "")
 FetchContent_Declare(json
   URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  ${FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS}
 )
 
 # EmbedR's configure step expects a concrete include path for nlohmann_json.
@@ -68,20 +77,30 @@ FetchContent_Declare(EmbedR
   GIT_REPOSITORY https://github.com/pbosetti/EmbedR.git
   GIT_TAG        v0.1.1
   GIT_SHALLOW TRUE
+  ${FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS}
 )
 
-FetchContent_MakeAvailable(pugg json EmbedR)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+  FetchContent_MakeAvailable(pugg json EmbedR)
+else()
+  foreach(_dependency IN ITEMS pugg json EmbedR)
+    string(TOLOWER "${_dependency}" _dependency_lower)
+    FetchContent_GetProperties(${_dependency})
+    if(NOT ${_dependency_lower}_POPULATED)
+      FetchContent_Populate(${_dependency})
+      add_subdirectory(
+        "${${_dependency_lower}_SOURCE_DIR}"
+        "${${_dependency_lower}_BINARY_DIR}"
+        EXCLUDE_FROM_ALL
+      )
+    endif()
+  endforeach()
+endif()
 
 # R 4.6 hides these declarations unless legacy non-API functions are enabled.
 # EmbedR v0.1.1 still calls Rf_findVarInFrame directly.
 if(TARGET EmbedR)
   target_compile_definitions(EmbedR PRIVATE ENABLE_LEGACY_NONAPI_FUNS)
-endif()
-
-# EmbedR exports EmbedRTargets and links nlohmann_json publicly.
-# Ensure nlohmann_json is exported as well to avoid configure-time export-set errors.
-if(TARGET nlohmann_json)
-  install(TARGETS nlohmann_json EXPORT EmbedRTargets)
 endif()
 
 FetchContent_Populate(plugin 
@@ -149,17 +168,15 @@ add_plugin(r_filter LIBS EmbedR::EmbedR)
 # INSTALL ######################################################################
 if(APPLE)
   install(TARGETS ${TARGET_LIST}
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION lib
-    ARCHIVE DESTINATION lib
-    COMPONENT MadsApps
+    LIBRARY DESTINATION lib COMPONENT MadsApps
+    RUNTIME DESTINATION lib COMPONENT MadsApps
+    ARCHIVE DESTINATION lib COMPONENT MadsApps
   )
 else()
   install(TARGETS ${TARGET_LIST}
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-    ARCHIVE DESTINATION lib
-    COMPONENT MadsApps
+    LIBRARY DESTINATION lib COMPONENT MadsApps
+    RUNTIME DESTINATION bin COMPONENT MadsApps
+    ARCHIVE DESTINATION lib COMPONENT MadsApps
   )
 endif()
 
@@ -189,6 +206,7 @@ set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_VENDOR "MADS")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+set(CPACK_COMPONENTS_ALL MadsApps)
 set(CPACK_PACKAGE_FILE_NAME
   "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${PACKAGE_OS_NAME}-${PACKAGE_ARCH_NAME}")
 include(CPack)
