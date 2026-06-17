@@ -39,8 +39,6 @@ endif()
 
 # DEPENDENCIES #################################################################
 include(FetchContent)
-set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE BOOL
-  "Do not contact remotes for already populated FetchContent dependencies" FORCE)
 
 set(FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
@@ -50,7 +48,7 @@ endif()
 # pugg is for the plugin system
 FetchContent_Declare(pugg 
   GIT_REPOSITORY https://github.com/pbosetti/pugg.git
-  GIT_TAG        1.0.2
+  GIT_TAG        1.0.4
   GIT_SHALLOW    TRUE
   ${FETCHCONTENT_EXCLUDE_FROM_INSTALL_ARGS}
 )
