@@ -24,6 +24,8 @@ with MADS v2.1.1 or later, install with:
 mads package --install r.plugin
 ```
 
+> **NOTE**: the pre-compiled package dynamically links to the R shared library: In some cases, your system may have a different version of R installed, and the plugin may not work. In that case, you can build the plugin from source (see below).
+
 ## Install from binaries
 
 Linux and MacOS:
