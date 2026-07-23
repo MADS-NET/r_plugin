@@ -118,7 +118,7 @@ private:
                 |___/                                      
 Enable the class as plugin 
 */
-INSTALL_SINK_DRIVER(RSink, json)
+MADS_REGISTER_PLUGINS(RSink)
 
 
 /*

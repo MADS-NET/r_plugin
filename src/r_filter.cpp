@@ -161,7 +161,7 @@ private:
                 |___/
 Enable the class as plugin
 */
-INSTALL_FILTER_DRIVER(RFilter, json, json);
+MADS_REGISTER_PLUGINS(RFilter);
 
 
 /*
