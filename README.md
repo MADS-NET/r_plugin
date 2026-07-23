@@ -3,9 +3,9 @@
 
 # r_plugin collection for MADS
 
-This project provides a Source, a Filret and a Sink plugin for [MADS](https://github.com/MADS-NET/MADS). The plugins provide a way to embed an R interpreter in the MADS network. They works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).
+This project provides a Source, a Filter and a Sink plugin for [MADS](https://github.com/MADS-NET/MADS). The plugins provide a way to embed an R interpreter in the MADS network. They works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).
 
-*Required MADS version: 2.0.0.*
+*Required MADS version: 2.4.0.*
 
 
 ## Supported platforms
@@ -18,7 +18,7 @@ Currently, the supported platforms are:
 
 ## Package install
 
-with MADS v2.1.1 or later, install with:
+with MADS v2.4.0 or later, install with:
 
 ```bash
 mads package --install r.plugin
@@ -44,15 +44,19 @@ cmake --build build --config Release
 cmake --install build --config Release
 ```
 
+## Multi-driver plugin
+
+This is a multi-driver plugin, which means that the same plugin can be used as a source, a filter or a sink. The driver to use is determined at runtime by the calling MADS agent (`mads source`, `mads filter` or `mads sink`). The plugin's `kind()` is used to define the INI section name, which is `r_source`, `r_filter` or `r_sink` respectively (can be overridden with the `--name` CLI option).
+
 
 ## INI settings
 
 The plugin supports the following settings in the INI file:
 
 ```ini
-[r_plugin]
+[r_filter]
 use_renv = false # use renv for package management
-init_script = "/path/to/scrip.R" # Mandatory path to the R script
+init_script = "/path/to/script.R" # Mandatory path to the R script
 r_output_mode = "stdout" # or "buffer"
 ```
 

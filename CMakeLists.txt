@@ -166,9 +166,7 @@ endif()
 include_directories(${json_SOURCE_DIR}/include)
 
 # These plugins are always build and use for testing
-add_plugin(r_source LIBS EmbedR::EmbedR)
-add_plugin(r_sink LIBS EmbedR::EmbedR)
-add_plugin(r_filter LIBS EmbedR::EmbedR)
+add_plugin(r LIBS EmbedR::EmbedR)
 
 
 # INSTALL ######################################################################

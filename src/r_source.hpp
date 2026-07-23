@@ -14,18 +14,12 @@
 */
 // Mandatory included headers
 #include <source.hpp>
-#include <nlohmann/json.hpp>
-#include <pugg/Kernel.h>
 #include <EmbedR.hpp>
 #include <variant>
 #include "r_plugin_common.hpp"
 
 // other includes as needed here
 
-// Define the name of the plugin
-#ifndef PLUGIN_NAME
-#define PLUGIN_NAME "r_source"
-#endif
 
 // Load the namespaces
 using namespace std;
@@ -39,7 +33,7 @@ class RSource : public Source<json> {
 public:
 
   // Typically, no need to change this
-  string kind() override { return PLUGIN_NAME; }
+  string kind() override { return "r_source"; }
 
   // Implement the actual functionality here
   // Return types:
@@ -110,16 +104,6 @@ private:
 };
 
 
-/*
-  ____  _             _             _      _
- |  _ \| |_   _  __ _(_)_ __     __| |_ __(_)_   _____ _ __
- | |_) | | | | |/ _` | | '_ \   / _` | '__| \ \ / / _ \ '__|
- |  __/| | |_| | (_| | | | | | | (_| | |  | |\ V /  __/ |
- |_|   |_|\__,_|\__, |_|_| |_|  \__,_|_|  |_| \_/ \___|_|
-                |___/
-Enable the class as plugin
-*/
-MADS_REGISTER_PLUGINS(RSource)
 
 
 /*
@@ -131,7 +115,7 @@ MADS_REGISTER_PLUGINS(RSource)
 
 For testing purposes, when directly executing the plugin
 */
-int main(int argc, char const *argv[]) {
+int main_source(int argc, char const *argv[]) {
   RSource plugin;
   json output, params;
 

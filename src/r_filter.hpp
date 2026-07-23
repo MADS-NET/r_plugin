@@ -14,18 +14,12 @@
 */
 // Mandatory included headers
 #include <filter.hpp>
-#include <nlohmann/json.hpp>
-#include <pugg/Kernel.h>
 #include <EmbedR.hpp>
 #include <variant>
 #include "r_plugin_common.hpp"
 
 // other includes as needed here
 
-// Define the name of the plugin
-#ifndef PLUGIN_NAME
-#define PLUGIN_NAME "r_filter"
-#endif
 
 // Load the namespaces
 using namespace std;
@@ -40,7 +34,7 @@ class RFilter : public Filter<json, json> {
 public:
 
   // Typically, no need to change this
-  string kind() override { return PLUGIN_NAME; }
+  string kind() override { return "r_filter"; }
 
   // Implement the actual functionality here
   // Return types:
@@ -152,16 +146,6 @@ private:
 };
 
 
-/*
-  ____  _             _             _      _
- |  _ \| |_   _  __ _(_)_ __     __| |_ __(_)_   _____ _ __
- | |_) | | | | |/ _` | | '_ \   / _` | '__| \ \ / / _ \ '__|
- |  __/| | |_| | (_| | | | | | | (_| | |  | |\ V /  __/ |
- |_|   |_|\__,_|\__, |_|_| |_|  \__,_|_|  |_| \_/ \___|_|
-                |___/
-Enable the class as plugin
-*/
-MADS_REGISTER_PLUGINS(RFilter);
 
 
 /*
@@ -173,7 +157,7 @@ MADS_REGISTER_PLUGINS(RFilter);
                           
 */
 
-int main(int argc, char const *argv[])
+int main_filter(int argc, char const *argv[])
 {
   try {
     RFilter plugin;
