@@ -19,7 +19,9 @@
 #include "r_plugin_common.hpp"
 
 // other includes as needed here
-
+#ifndef PLUGIN_NAME
+#define PLUGIN_NAME "r"
+#endif
 
 // Load the namespaces
 using namespace std;
