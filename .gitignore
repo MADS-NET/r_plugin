@@ -3,3 +3,5 @@ build
 .Rprofile
 .Rproj.user
 *.bak
+.DS_Store
+.Rhistory
