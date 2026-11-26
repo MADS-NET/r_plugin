@@ -18,7 +18,7 @@ cmake_minimum_required(VERSION 3.20)
 if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build.")
 endif()
-project(r_plugin VERSION 2.3.0 LANGUAGES CXX)
+project(r_plugin VERSION 3.0.0 LANGUAGES CXX)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   execute_process(
     COMMAND mads -p
