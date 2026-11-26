@@ -5,7 +5,7 @@
 
 This project provides a Source, a Filter and a Sink plugin for [MADS](https://github.com/MADS-NET/MADS). The plugins provide a way to embed an R interpreter in the MADS network. They works analogously to the [MADS Python agent](https://github.com/mads-net/python_agent).
 
-*Required MADS version: 2.4.0.*
+*Required MADS version: 3.0.0.*
 
 
 ## Supported platforms
